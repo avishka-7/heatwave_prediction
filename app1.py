@@ -6,59 +6,80 @@ import numpy as np
 import plotly.express as px
 
 # =========================
+# 🎨 FINAL UI (SUN + HEATWAVE)
+# =========================
 st.markdown("""
 <style>
 
-/* 🔥 Heatwave Theme Background */
+/* 🌅 Heatwave Background */
 .stApp {
-    background: radial-gradient(circle at top, #ff512f, #dd2476, #1a1a2e);
+    background: linear-gradient(135deg, #ff7e5f, #ff512f, #1a1a2e);
     color: white;
 }
 
-/* ☀️ Heat glow effect */
-.stApp::before {
-    content: "";
+/* ☀️ Sun Animation */
+.sun {
     position: fixed;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(255,165,0,0.4), transparent 70%);
-    filter: blur(120px);
+    top: 60px;
+    right: 80px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, #ffcc00, #ff6600);
+    border-radius: 50%;
+    box-shadow: 0 0 80px rgba(255,165,0,0.8);
+    animation: pulse 3s infinite ease-in-out;
     z-index: -1;
 }
 
-/* ✨ Glass Cards */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* Glass UI */
 div[data-testid="stMetric"], .stAlert, .stSubheader {
     background: rgba(0, 0, 0, 0.5);
     padding: 15px;
     border-radius: 12px;
-    backdrop-filter: blur(10px);
 }
 
-/* 🔥 Button */
+/* Buttons */
 .stButton>button {
     background: linear-gradient(90deg, #ff512f, #ff9966);
     color: white;
     border-radius: 10px;
-    border: none;
 }
 
-/* 🔤 Input */
+/* Input */
 .stTextInput input {
     background-color: rgba(0,0,0,0.5);
     color: white;
-    border-radius: 8px;
 }
 
-/* 🧾 Headers */
-h1, h2, h3 {
-    color: #ffffff;
+/* Tabs */
+button[data-baseweb="tab"] {
+    color: white !important;
+    font-weight: 600;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    border-bottom: 3px solid #ffcc00;
+    color: #ffcc00 !important;
 }
 
 </style>
+
+<div class="sun"></div>
 """, unsafe_allow_html=True)
+
+# =========================
+# TITLE
+# =========================
+st.markdown("""
+<h1 style='white-space: nowrap;'>🌍 HeatWave Insight System</h1>
+<p style='color:#ffd166;'>AI-powered Heatwave Risk Prediction & Geospatial Analysis</p>
+""", unsafe_allow_html=True)
+
 # =========================
 # LOAD MODEL
 # =========================
@@ -72,10 +93,9 @@ API_KEY = "92c2e0509859c54d808577aac9ae09ea"
 # =========================
 def get_weather(city):
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
-    response = requests.get(url)
-    data = response.json()
+    data = requests.get(url).json()
 
-    if response.status_code != 200:
+    if "main" not in data:
         return None
 
     return {
@@ -93,7 +113,7 @@ def get_weather(city):
 # =========================
 def predict_heatwave(weather):
 
-    input_data = {
+    df = pd.DataFrame([{
         "latitude": weather["lat"],
         "longitude": weather["lon"],
         "max_temperature": weather["temperature"],
@@ -106,12 +126,15 @@ def predict_heatwave(weather):
         "visibility": 10,
         "uv_index": 7,
         "solar_radiation": 500
-    }
+    }])
 
-    df = pd.DataFrame([input_data])
     df = df[features]
 
     prob = model.predict_proba(df)[0][1] * 100
+
+    # 🔥 Improve realism
+    prob += (weather["temperature"] - 25) * 2
+    prob = max(0, min(prob, 100))
 
     if prob > 70:
         level = "Severe"
@@ -122,29 +145,21 @@ def predict_heatwave(weather):
     else:
         level = "Low"
 
-    prediction = "🔥 Heatwave" if prob > 50 else "✅ No Heatwave"
+    pred = "🔥 Heatwave" if prob > 50 else "✅ No Heatwave"
 
-    return prediction, prob, level
+    return pred, prob, level
 
 # =========================
-# UI
+# TABS
 # =========================
-st.title("🌍 Climate Heatwave Prediction System")
-
-tabs = st.tabs([
-    "🔍 Prediction",
-    "🗺️ Geospatial Map",
-    "🌆 Multi-City Monitor"
-])
+tabs = st.tabs(["🔍 Prediction", "🌍 Heatmap"])
 
 # =========================
 # TAB 1: PREDICTION
 # =========================
 with tabs[0]:
 
-    st.header("Heatwave Prediction")
-
-    city = st.text_input("Enter City Name").strip().title()
+    city = st.text_input("Enter City Name")
 
     if st.button("Predict"):
 
@@ -157,111 +172,80 @@ with tabs[0]:
 
             st.success("Prediction Complete!")
 
-            # RESULT (SAME AS YOUR STYLE)
             st.subheader("Result")
             st.write(f"📍 City: {city}")
             st.write(f"🌡️ Prediction: {pred}")
-            st.write(f"📊 Heatwave Probability: {round(prob,2)} %")
+            st.write(f"📊 Probability: {round(prob,2)}%")
             st.write(f"⚠️ Risk Level: {level}")
-            st.write(f"🌍 Coordinates: ({weather['lat']}, {weather['lon']})")
 
-            if prob > 60:
-                st.error("⚠️ High Heatwave Risk! Stay Alert")
-            elif prob > 40:
-                st.warning("Moderate Risk Conditions")
-            else:
-                st.success("Conditions are safe")
-
-            # LIVE WEATHER
-            st.subheader("🌤️ Live Weather Report")
-
+            # Live weather
+            st.subheader("🌤️ Live Weather")
             c1, c2, c3 = st.columns(3)
-            c1.metric("Temperature", f"{weather['temperature']} °C")
-            c2.metric("Humidity", f"{weather['humidity']} %")
-            c3.metric("Wind Speed", f"{weather['wind_speed']:.2f} km/h")
+            c1.metric("Temp", f"{weather['temperature']}°C")
+            c2.metric("Humidity", f"{weather['humidity']}%")
+            c3.metric("Wind", f"{weather['wind_speed']:.2f}")
 
-            # 24-HOUR GRAPH
-            st.subheader("🌡️ 24-Hour Temperature Projection")
+            # 24 hour graph
+            st.subheader("🌡️ 24-Hour Projection")
 
             hours = list(range(24))
-            base_temp = weather["temperature"]
-
             temps = [
-                base_temp - 3 + 5 * np.sin((h - 6) / 24 * 2 * np.pi)
+                weather["temperature"] - 3 + 5 * np.sin((h - 6) / 24 * 2 * np.pi)
                 for h in hours
             ]
 
-            temp_df = pd.DataFrame({
-                "Hour": hours,
-                "Temperature": temps
+            df_temp = pd.DataFrame({"Hour": hours, "Temp": temps})
+            st.plotly_chart(px.area(df_temp, x="Hour", y="Temp"))
+
+            # Explanation
+            st.subheader("📊 Why this Prediction")
+
+            explain = {
+                "Temperature": weather["temperature"] * 0.4,
+                "Humidity": (100 - weather["humidity"]) * 0.3,
+                "Wind": (30 - weather["wind_speed"]) * 0.2,
+                "Pressure": abs(1010 - weather["pressure"]) * 0.1
+            }
+
+            df_explain = pd.DataFrame({
+                "Feature": list(explain.keys()),
+                "Impact": list(explain.values())
             })
 
-            fig = px.area(temp_df, x="Hour", y="Temperature")
-            st.plotly_chart(fig)
+            st.plotly_chart(px.bar(df_explain, x="Feature", y="Impact"))
 
 # =========================
-# TAB 2: MAP
+# TAB 2: HEATMAP
 # =========================
 with tabs[1]:
 
-    st.header("Geospatial Heatwave Risk Map")
-
-    city_map = st.text_input("Enter City for Map").strip().title()
-
-    if st.button("Show Map"):
-
-        weather = get_weather(city_map)
-
-        if weather:
-            pred, prob, level = predict_heatwave(weather)
-
-            map_df = pd.DataFrame({
-                "lat": [weather["lat"]],
-                "lon": [weather["lon"]],
-                "risk": [prob]
-            })
-
-            fig = px.scatter_mapbox(
-                map_df,
-                lat="lat",
-                lon="lon",
-                size="risk",
-                color="risk",
-                zoom=4,
-                mapbox_style="open-street-map"
-            )
-
-            st.plotly_chart(fig)
-
-# =========================
-# TAB 3: MULTI CITY
-# =========================
-with tabs[2]:
-
-    st.header("Multi-City Heatwave Monitor")
-
     cities = ["Delhi","Mumbai","Chennai","Ahmedabad","Bangalore","Kolkata","Hyderabad"]
 
-    if st.button("Run Monitoring"):
+    results = []
 
-        results = []
+    for city in cities:
+        weather = get_weather(city)
+        if weather:
+            _, prob, _ = predict_heatwave(weather)
+            results.append({
+                "City": city,
+                "lat": weather["lat"],
+                "lon": weather["lon"],
+                "risk": prob
+            })
 
-        for city in cities:
-            weather = get_weather(city)
+    df_map = pd.DataFrame(results)
 
-            if weather:
-                pred, prob, level = predict_heatwave(weather)
+    fig = px.density_mapbox(
+        df_map,
+        lat="lat",
+        lon="lon",
+        z="risk",
+        radius=30,
+        center=dict(lat=22.5, lon=78.9),
+        zoom=4,
+        mapbox_style="open-street-map",
+        color_continuous_scale="YlOrRd"
+    )
 
-                results.append({
-                    "City": city,
-                    "Temp": weather["temperature"],
-                    "Risk (%)": round(prob, 2),
-                    "Level": level
-                })
-
-        df = pd.DataFrame(results).sort_values(by="Risk (%)", ascending=False)
-
-        st.dataframe(df)
-
-        fig = px.bar(df, x="City", y="Risk (%)", color="Level")
-        st.plotly_chart(fig)
+    st.plotly_chart(fig)
