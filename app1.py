@@ -158,14 +158,14 @@ tabs = st.tabs(["🔍 Prediction", "🔆 Heatmap"])
 # =========================
 with tabs[0]:
 
-    city = st.text_input("Enter City Name")
+    city = st.text_input("Enter Name")
 
     if st.button("Predict"):
 
         weather = get_weather(city)
 
         if weather is None:
-            st.error("❌ City not found")
+            st.error("❌ Place not found")
         else:
             pred, prob, level = predict_heatwave(weather)
 
