@@ -43,7 +43,7 @@ div[data-testid="stMetric"], .stAlert, .stSubheader {
 model = joblib.load("xgboost_model.pkl")
 features = joblib.load("model_features.pkl")
 
-API_KEY = "YOUR_API_KEY"
+API_KEY = "92c2e0509859c54d808577aac9ae09ea"
 
 # =========================
 # WEATHER FUNCTION
