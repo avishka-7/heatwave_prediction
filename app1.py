@@ -218,7 +218,7 @@ with tabs[0]:
 # =========================
 with tabs[1]:
 
-    cities = ["Delhi","Mumbai","Chennai","Ahmedabad","Bangalore","Kolkata","Hyderabad"]
+    cities = ["Delhi","Mumbai","Chennai","Ahmedabad","Bangalore","Kolkata","Hyderabad","Jaipur","Lucknow","Dispur","Panaji","Bhopal","Shillong","Chandigarh","Thiruvananthapuram"]
 
     results = []
 
