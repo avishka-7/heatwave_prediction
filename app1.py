@@ -76,8 +76,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 # TITLE
 # =========================
 st.markdown("""
-<h1 style='white-space: nowrap;'>🌍 HeatWave Insight System</h1>
-<p style='color:#ffd166;'>AI-powered Heatwave Risk Prediction & Geospatial Analysis</p>
+<h1 style='white-space: nowrap;'>🌞 HeatWave Insight System</h1>
 """, unsafe_allow_html=True)
 
 # =========================
@@ -152,7 +151,7 @@ def predict_heatwave(weather):
 # =========================
 # TABS
 # =========================
-tabs = st.tabs(["🔍 Prediction", "🌍 Heatmap"])
+tabs = st.tabs(["🔍 Prediction", "🔆 Heatmap"])
 
 # =========================
 # TAB 1: PREDICTION
