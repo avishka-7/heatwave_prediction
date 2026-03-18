@@ -6,16 +6,37 @@ import numpy as np
 import plotly.express as px
 
 # =========================
-# 🎨 GLASS UI (STATIC)
-# =========================
 st.markdown("""
 <style>
+
+/* 🌄 Animated Sun Gradient Background */
 .stApp {
-    background-size: cover;
-    background-attachment: fixed;
+    background: linear-gradient(-45deg, #ff9a00, #ff512f, #dd2476, #1e3c72);
+    background-size: 400% 400%;
+    animation: gradientMove 15s ease infinite;
     color: white;
 }
 
+/* 🌞 Animation */
+@keyframes gradientMove {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+/* 🖤 DARK OVERLAY FOR TEXT VISIBILITY */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    z-index: -1;
+}
+
+/* ✨ Glass Cards */
 div[data-testid="stMetric"], .stAlert, .stSubheader {
     background: rgba(255, 255, 255, 0.08);
     padding: 15px;
@@ -23,17 +44,21 @@ div[data-testid="stMetric"], .stAlert, .stSubheader {
     backdrop-filter: blur(12px);
 }
 
+/* 🔵 Button */
 .stButton>button {
-    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
     color: white;
     border-radius: 10px;
     border: none;
 }
 
-.stTextInput>div>div>input {
+/* 🔤 Input */
+.stTextInput input {
     background-color: rgba(255,255,255,0.15);
     color: white;
+    border-radius: 8px;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
