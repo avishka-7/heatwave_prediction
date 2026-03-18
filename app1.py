@@ -9,44 +9,37 @@ import plotly.express as px
 st.markdown("""
 <style>
 
-/* ☀️ Clean Heatwave Gradient Background */
+/* 🔥 Heatwave Theme Background */
 .stApp {
-    background: linear-gradient(135deg, #ff7e5f, #feb47b);
-    background-size: 200% 200%;
-    animation: moveBg 12s ease infinite;
+    background: radial-gradient(circle at top, #ff512f, #dd2476, #1a1a2e);
     color: white;
 }
 
-/* 🌞 Smooth Animation (not aggressive) */
-@keyframes moveBg {
-    0% {background-position: 0% 50%;}
-    50% {background-position: 100% 50%;}
-    100% {background-position: 0% 50%;}
-}
-
-/* 🖤 Dark overlay for readability */
+/* ☀️ Heat glow effect */
 .stApp::before {
     content: "";
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.35);
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,165,0,0.4), transparent 70%);
+    filter: blur(120px);
     z-index: -1;
 }
 
-/* ✨ Glass UI */
+/* ✨ Glass Cards */
 div[data-testid="stMetric"], .stAlert, .stSubheader {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
     padding: 15px;
     border-radius: 12px;
     backdrop-filter: blur(10px);
 }
 
-/* 🔵 Button */
+/* 🔥 Button */
 .stButton>button {
-    background: linear-gradient(90deg, #ff512f, #dd2476);
+    background: linear-gradient(90deg, #ff512f, #ff9966);
     color: white;
     border-radius: 10px;
     border: none;
@@ -54,9 +47,14 @@ div[data-testid="stMetric"], .stAlert, .stSubheader {
 
 /* 🔤 Input */
 .stTextInput input {
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0,0,0,0.5);
     color: white;
     border-radius: 8px;
+}
+
+/* 🧾 Headers */
+h1, h2, h3 {
+    color: #ffffff;
 }
 
 </style>
@@ -155,22 +153,6 @@ with tabs[0]:
         if weather is None:
             st.error("❌ City not found")
         else:
-            # 🌦️ DYNAMIC BACKGROUND
-            if weather["temperature"] > 35:
-                bg = "https://images.unsplash.com/photo-1504384308090-c894fdcc538d"
-            elif weather["rainfall"] > 0:
-                bg = "https://images.unsplash.com/photo-1501691223387-dd0500403075"
-            else:
-                bg = "https://images.unsplash.com/photo-1502082553048-f009c37129b9"
-
-            st.markdown(f"""
-            <style>
-            .stApp {{
-                background-image: url("{bg}");
-            }}
-            </style>
-            """, unsafe_allow_html=True)
-
             pred, prob, level = predict_heatwave(weather)
 
             st.success("Prediction Complete!")
