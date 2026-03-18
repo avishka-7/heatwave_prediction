@@ -9,22 +9,22 @@ import plotly.express as px
 st.markdown("""
 <style>
 
-/* 🌄 Animated Sun Gradient Background */
+/* ☀️ Clean Heatwave Gradient Background */
 .stApp {
-    background: linear-gradient(-45deg, #ff9a00, #ff512f, #dd2476, #1e3c72);
-    background-size: 400% 400%;
-    animation: gradientMove 15s ease infinite;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    background-size: 200% 200%;
+    animation: moveBg 12s ease infinite;
     color: white;
 }
 
-/* 🌞 Animation */
-@keyframes gradientMove {
+/* 🌞 Smooth Animation (not aggressive) */
+@keyframes moveBg {
     0% {background-position: 0% 50%;}
     50% {background-position: 100% 50%;}
     100% {background-position: 0% 50%;}
 }
 
-/* 🖤 DARK OVERLAY FOR TEXT VISIBILITY */
+/* 🖤 Dark overlay for readability */
 .stApp::before {
     content: "";
     position: fixed;
@@ -32,21 +32,21 @@ st.markdown("""
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0, 0, 0, 0.35);
     z-index: -1;
 }
 
-/* ✨ Glass Cards */
+/* ✨ Glass UI */
 div[data-testid="stMetric"], .stAlert, .stSubheader {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.4);
     padding: 15px;
     border-radius: 12px;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(10px);
 }
 
 /* 🔵 Button */
 .stButton>button {
-    background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    background: linear-gradient(90deg, #ff512f, #dd2476);
     color: white;
     border-radius: 10px;
     border: none;
@@ -54,14 +54,13 @@ div[data-testid="stMetric"], .stAlert, .stSubheader {
 
 /* 🔤 Input */
 .stTextInput input {
-    background-color: rgba(255,255,255,0.15);
+    background-color: rgba(0,0,0,0.4);
     color: white;
     border-radius: 8px;
 }
 
 </style>
 """, unsafe_allow_html=True)
-
 # =========================
 # LOAD MODEL
 # =========================
