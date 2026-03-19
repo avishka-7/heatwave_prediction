@@ -302,4 +302,4 @@ with tabs[1]:
         st.dataframe(df_map.sort_values(by="risk", ascending=False))
 
     else:
-        st.success("✅ No high-risk zones detected") zones detected")
+        st.success("✅ No high-risk zones detected")
