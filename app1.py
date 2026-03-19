@@ -6,7 +6,7 @@ import numpy as np
 import plotly.express as px
 
 # =========================
-# 🎨 UI DESIGN (HEATWAVE THEME)
+# 🎨 UI DESIGN 
 # =========================
 st.markdown("""
 <style>
@@ -224,7 +224,8 @@ with tabs[0]:
             st.plotly_chart(px.bar(df_explain, x="Feature", y="Impact"))
 
 # =========================
-# TAB 2: HEATMAP (UPDATED)
+# =========================
+# TAB 2: HEATMAP 
 # =========================
 with tabs[1]:
 
@@ -256,6 +257,7 @@ with tabs[1]:
             if prob > 50:
                 alerts.append(f"🚨 {city} - {round(prob,1)}%")
 
+    # Alerts
     if alerts:
         st.subheader("🚨 Active Alerts")
         for a in alerts:
@@ -265,6 +267,7 @@ with tabs[1]:
 
         df_map = pd.DataFrame(results)
 
+        # 🔥 HEATMAP
         heatmap = px.density_mapbox(
             df_map,
             lat="lat",
@@ -277,25 +280,26 @@ with tabs[1]:
             color_continuous_scale="YlOrRd"
         )
 
+        # 📍 CITY MARKERS (WITH NAMES)
         scatter = px.scatter_mapbox(
             df_map,
             lat="lat",
             lon="lon",
-            text="City",
+            text="City",  # 👈 names visible
             size="risk",
             color="risk",
             color_continuous_scale="YlOrRd"
         )
 
+        # Merge both
         for trace in scatter.data:
             heatmap.add_trace(trace)
 
-        heatmap.update_traces(textposition="top center")
-
         st.plotly_chart(heatmap, use_container_width=True)
 
+        # Table
         st.subheader("📍 High Risk Locations")
         st.dataframe(df_map.sort_values(by="risk", ascending=False))
 
     else:
-        st.success("✅ No high-risk zones detected")
+        st.success("✅ No high-risk zones detected") zones detected")
