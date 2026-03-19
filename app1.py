@@ -6,18 +6,18 @@ import numpy as np
 import plotly.express as px
 
 # =========================
-# 🎨 FINAL UI (SUN + HEATWAVE)
+# 🎨 UI DESIGN
 # =========================
 st.markdown("""
 <style>
 
-/* 🌅 Heatwave Background */
+/* Background */
 .stApp {
     background: linear-gradient(135deg, #ff7e5f, #ff512f, #1a1a2e);
     color: white;
 }
 
-/* ☀️ Sun Animation */
+/* Sun animation */
 .sun {
     position: fixed;
     top: 60px;
@@ -37,7 +37,7 @@ st.markdown("""
     100% { transform: scale(1); opacity: 0.8; }
 }
 
-/* Glass UI */
+/* Cards */
 div[data-testid="stMetric"], .stAlert, .stSubheader {
     background: rgba(0, 0, 0, 0.5);
     padding: 15px;
@@ -131,7 +131,7 @@ def predict_heatwave(weather):
 
     prob = model.predict_proba(df)[0][1] * 100
 
-    # 🔥 Improve realism
+    # Improve realism
     prob += (weather["temperature"] - 25) * 2
     prob = max(0, min(prob, 100))
 
@@ -149,12 +149,26 @@ def predict_heatwave(weather):
     return pred, prob, level
 
 # =========================
+# ALERT FUNCTION
+# =========================
+def show_alert(prob, city):
+
+    if prob > 70:
+        st.error(f"🚨 SEVERE HEATWAVE ALERT in {city}! Avoid going outside.")
+    elif prob > 50:
+        st.warning(f"⚠️ HIGH RISK in {city}. Stay hydrated.")
+    elif prob > 30:
+        st.info(f"🌡️ Moderate heat in {city}. Take precautions.")
+    else:
+        st.success(f"✅ Safe conditions in {city}.")
+
+# =========================
 # TABS
 # =========================
 tabs = st.tabs(["🔍 Prediction", "🔆 Heatmap"])
 
 # =========================
-# TAB 1: PREDICTION
+# TAB 1
 # =========================
 with tabs[0]:
 
@@ -177,74 +191,94 @@ with tabs[0]:
             st.write(f"📊 Probability: {round(prob,2)}%")
             st.write(f"⚠️ Risk Level: {level}")
 
-            # Live weather
+            # 🚨 ALERT
+            show_alert(prob, city)
+
+            # Weather
             st.subheader("🌤️ Live Weather")
             c1, c2, c3 = st.columns(3)
             c1.metric("Temp", f"{weather['temperature']}°C")
             c2.metric("Humidity", f"{weather['humidity']}%")
             c3.metric("Wind", f"{weather['wind_speed']:.2f}")
 
-            # 24 hour graph
+            # 24h graph
             st.subheader("🌡️ 24-Hour Projection")
-
             hours = list(range(24))
             temps = [
                 weather["temperature"] - 3 + 5 * np.sin((h - 6) / 24 * 2 * np.pi)
                 for h in hours
             ]
-
             df_temp = pd.DataFrame({"Hour": hours, "Temp": temps})
             st.plotly_chart(px.area(df_temp, x="Hour", y="Temp"))
 
             # Explanation
-            st.subheader("📊 Why this Prediction")
-
+            st.subheader("Feature Contribution Analysis")
             explain = {
                 "Temperature": weather["temperature"] * 0.4,
                 "Humidity": (100 - weather["humidity"]) * 0.3,
                 "Wind": (30 - weather["wind_speed"]) * 0.2,
                 "Pressure": abs(1010 - weather["pressure"]) * 0.1
             }
-
             df_explain = pd.DataFrame({
-                "Feature": list(explain.keys()),
-                "Impact": list(explain.values())
+                "Feature": explain.keys(),
+                "Impact": explain.values()
             })
-
             st.plotly_chart(px.bar(df_explain, x="Feature", y="Impact"))
 
 # =========================
-# TAB 2: HEATMAP
+# TAB 2
 # =========================
 with tabs[1]:
 
-    cities = ["Delhi","Mumbai","Chennai","Ahmedabad","Bangalore","Kolkata","Hyderabad","Jaipur","Lucknow","Dispur","Panaji","Bhopal","Shillong","Chandigarh","Thiruvananthapuram"]
+    st.header("🔥 Heatwave Risk Zones")
+
+    cities = [
+        "Delhi","Mumbai","Chennai","Ahmedabad",
+        "Bangalore","Kolkata","Hyderabad",
+        "Pune","Jaipur","Lucknow","Nagpur","Indore"
+    ]
 
     results = []
+    alerts = []
 
     for city in cities:
         weather = get_weather(city)
+
         if weather:
-            _, prob, _ = predict_heatwave(weather)
-            results.append({
-                "City": city,
-                "lat": weather["lat"],
-                "lon": weather["lon"],
-                "risk": prob
-            })
+            _, prob, level = predict_heatwave(weather)
 
-    df_map = pd.DataFrame(results)
+            if prob > 30:
+                results.append({
+                    "City": city,
+                    "lat": weather["lat"],
+                    "lon": weather["lon"],
+                    "risk": prob
+                })
 
-    fig = px.density_mapbox(
-        df_map,
-        lat="lat",
-        lon="lon",
-        z="risk",
-        radius=30,
-        center=dict(lat=22.5, lon=78.9),
-        zoom=4,
-        mapbox_style="open-street-map",
-        color_continuous_scale="YlOrRd"
-    )
+            if prob > 50:
+                alerts.append(f"🚨 {city} - {round(prob,1)}%")
 
-    st.plotly_chart(fig)
+    # Alerts
+    if alerts:
+        st.subheader("🚨 Active Alerts")
+        for a in alerts:
+            st.error(a)
+
+    if len(results) > 0:
+        df_map = pd.DataFrame(results)
+
+        fig = px.density_mapbox(
+            df_map,
+            lat="lat",
+            lon="lon",
+            z="risk",
+            radius=35,
+            center=dict(lat=22.5, lon=78.9),
+            zoom=4,
+            mapbox_style="open-street-map",
+            color_continuous_scale="YlOrRd"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.success("✅ No high-risk zones detected")
