@@ -6,14 +6,14 @@ import numpy as np
 import plotly.express as px
 
 # =========================
-# 🎨 UI DESIGN
+# 🎨 UI DESIGN (HEATWAVE THEME)
 # =========================
 st.markdown("""
 <style>
 
 /* Background */
 .stApp {
-    background: linear-gradient(135deg, #ff7e5f, #ff512f, #1a1a2e);
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
     color: white;
 }
 
@@ -53,14 +53,14 @@ div[data-testid="stMetric"], .stAlert, .stSubheader {
 
 /* Input */
 .stTextInput input {
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.6);
     color: white;
 }
 
 /* Tabs */
 button[data-baseweb="tab"] {
     color: white !important;
-    font-weight: 800;
+    font-weight: 600;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
     border-bottom: 3px solid #ffcc00;
@@ -75,9 +75,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 # =========================
 # TITLE
 # =========================
-st.markdown("""
-<h1 style='white-space: nowrap;'>🌞 HeatWave Insight System</h1>
-""", unsafe_allow_html=True)
+st.markdown("<h1>🌞 HeatWave Insight System</h1>", unsafe_allow_html=True)
 
 # =========================
 # LOAD MODEL
@@ -168,7 +166,7 @@ def show_alert(prob, city):
 tabs = st.tabs(["🔍 Prediction", "🔆 Heatmap"])
 
 # =========================
-# TAB 1
+# TAB 1: PREDICTION
 # =========================
 with tabs[0]:
 
@@ -194,15 +192,15 @@ with tabs[0]:
             # 🚨 ALERT
             show_alert(prob, city)
 
-            # Weather
+            # Weather cards
             st.subheader("🌤️ Live Weather")
             c1, c2, c3 = st.columns(3)
-            c1.metric("Temp", f"{weather['temperature']}°C")
+            c1.metric("Temperature", f"{weather['temperature']}°C")
             c2.metric("Humidity", f"{weather['humidity']}%")
-            c3.metric("Wind", f"{weather['wind_speed']:.2f}")
+            c3.metric("Wind Speed", f"{weather['wind_speed']:.2f} km/h")
 
-            # 24h graph
-            st.subheader("🌡️ 24-Hour Projection")
+            # 24-hour graph
+            st.subheader(" 24-Hour Temperature Projection")
             hours = list(range(24))
             temps = [
                 weather["temperature"] - 3 + 5 * np.sin((h - 6) / 24 * 2 * np.pi)
@@ -212,7 +210,7 @@ with tabs[0]:
             st.plotly_chart(px.area(df_temp, x="Hour", y="Temp"))
 
             # Explanation
-            st.subheader("Feature Contribution Analysis")
+            st.subheader(" Feature Contribution Analysis")
             explain = {
                 "Temperature": weather["temperature"] * 0.4,
                 "Humidity": (100 - weather["humidity"]) * 0.3,
@@ -226,7 +224,7 @@ with tabs[0]:
             st.plotly_chart(px.bar(df_explain, x="Feature", y="Impact"))
 
 # =========================
-# TAB 2
+# TAB 2: HEATMAP (UPDATED)
 # =========================
 with tabs[1]:
 
@@ -258,16 +256,16 @@ with tabs[1]:
             if prob > 50:
                 alerts.append(f"🚨 {city} - {round(prob,1)}%")
 
-    # Alerts
     if alerts:
         st.subheader("🚨 Active Alerts")
         for a in alerts:
             st.error(a)
 
     if len(results) > 0:
+
         df_map = pd.DataFrame(results)
 
-        fig = px.density_mapbox(
+        heatmap = px.density_mapbox(
             df_map,
             lat="lat",
             lon="lon",
@@ -279,6 +277,25 @@ with tabs[1]:
             color_continuous_scale="YlOrRd"
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        scatter = px.scatter_mapbox(
+            df_map,
+            lat="lat",
+            lon="lon",
+            text="City",
+            size="risk",
+            color="risk",
+            color_continuous_scale="YlOrRd"
+        )
+
+        for trace in scatter.data:
+            heatmap.add_trace(trace)
+
+        heatmap.update_traces(textposition="top center")
+
+        st.plotly_chart(heatmap, use_container_width=True)
+
+        st.subheader("📍 High Risk Locations")
+        st.dataframe(df_map.sort_values(by="risk", ascending=False))
+
     else:
         st.success("✅ No high-risk zones detected")
