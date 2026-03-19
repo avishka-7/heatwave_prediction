@@ -14,7 +14,7 @@ st.markdown("""
 /* Background */
 .stApp {
     background: linear-gradient(135deg, #ff7e5f, #ff512f, #1a1a2e);
-    color: black;
+    color: white;
 }
 
 /* Sun animation */
@@ -54,7 +54,7 @@ div[data-testid="stMetric"], .stAlert, .stSubheader {
 /* Input */
 .stTextInput input {
     background-color: rgba(0,0,0,0.5);
-    color: black;
+    color: white;
 }
 
 /* Tabs */
