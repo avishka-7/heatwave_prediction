@@ -298,7 +298,7 @@ with tabs[1]:
         st.plotly_chart(heatmap, use_container_width=True)
 
         # Table
-        st.subheader("📍 High Risk Locations")
+        st.subheader("High Risk Locations")
         st.dataframe(df_map.sort_values(by="risk", ascending=False))
 
     else:
